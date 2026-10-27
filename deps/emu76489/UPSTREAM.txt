@@ -1,0 +1,6 @@
+https://github.com/digital-sound-antiques/emu76489
+commit c0fa097060e022db237163d79704025435042997
+MIT license retained. Local modifications: zero-initialize allocated context;
+configurable noise-feedback polynomial preserved across noise-register writes.
+Non-tone data bytes update the latched volume/noise register; this also avoids
+indexing beyond freq[3] after selecting noise registers.

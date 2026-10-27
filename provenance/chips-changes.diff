@@ -1,0 +1,50 @@
+--- upstream/chips/z80.h
++++ local/chips/z80.h
+@@ -462,7 +462,11 @@
+ }
+ 
+ // sign+zero+parity lookup table
+-static const uint8_t _z80_szp_flags[256] = {
++/* RP2350 port: keep the two CPU lookup tables beside SRAM-resident execution. */
++#ifndef CHIPS_Z80_CONST_ATTR
++#define CHIPS_Z80_CONST_ATTR
++#endif
++static const uint8_t _z80_szp_flags[256] CHIPS_Z80_CONST_ATTR = {
+   0x44,0x00,0x00,0x04,0x00,0x04,0x04,0x00,0x08,0x0c,0x0c,0x08,0x0c,0x08,0x08,0x0c,
+   0x00,0x04,0x04,0x00,0x04,0x00,0x00,0x04,0x0c,0x08,0x08,0x0c,0x08,0x0c,0x0c,0x08,
+   0x20,0x24,0x24,0x20,0x24,0x20,0x20,0x24,0x2c,0x28,0x28,0x2c,0x28,0x2c,0x2c,0x28,
+@@ -482,7 +486,7 @@
+ };
+ 
+ // lookup table for (HL)/(IX/IY+d) ops
+-static const uint8_t _z80_indirect_table[256] = {
++static const uint8_t _z80_indirect_table[256] CHIPS_Z80_CONST_ATTR = {
+     // <% indirect_table
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+@@ -942,8 +946,15 @@
+     return pins;
+ }
+ 
++/* RP2350 port opt-in placement for the CPU hot path, including its outlined helper. */
++#ifndef CHIPS_Z80_TICK_ATTR
++#define CHIPS_Z80_TICK_ATTR
++#endif
++#ifndef CHIPS_Z80_FETCH_ATTR
++#define CHIPS_Z80_FETCH_ATTR
++#endif
+ // initiate a fetch machine cycle for regular (non-prefixed) instructions, or initiate interrupt handling
+-static inline uint64_t _z80_fetch(z80_t* cpu, uint64_t pins) {
++static inline CHIPS_Z80_FETCH_ATTR uint64_t _z80_fetch(z80_t* cpu, uint64_t pins) {
+     cpu->hlx_idx = 0;
+     cpu->prefix_active = false;
+     // shortcut no interrupts requested
+@@ -1065,7 +1076,7 @@
+ #define _cc_p           (!(cpu->f&Z80_SF))
+ #define _cc_m           (cpu->f&Z80_SF)
+ 
+-uint64_t z80_tick(z80_t* cpu, uint64_t pins) {
++CHIPS_Z80_TICK_ATTR uint64_t z80_tick(z80_t* cpu, uint64_t pins) {
+     pins &= ~(Z80_CTRL_PIN_MASK|Z80_RETI);
+     switch (cpu->step) {
+         // <% decoder
